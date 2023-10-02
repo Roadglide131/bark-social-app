@@ -16,16 +16,16 @@ const userSchema = new mongoose.Schema({
   thoughts: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Thought",
+      ref: "thought",
     },
   ],
   friends: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "users",
     },
   ],
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model("users", userSchema);
 module.exports = User;
