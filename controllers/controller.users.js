@@ -61,38 +61,42 @@ exports.delete_user_id = async (req, res) => {
   }
 };
 // GET a single user by its _id and populated thought and friend data
-exports.get_specific_user = async ({ req, res }) => {
+exports.get_specific_user = async (req, res) => {
   try {
     let user_thoughts_friends = await User.findById(req.params.id).populate(
-      "thougts friends"
+      "thoughts friends"
     );
     return res.status(200).json({ user: user_thoughts_friends });
   } catch (err) {
+    console.error(err);
     return res
       .status(404)
       .json({ err_user_not_found: "We couldn't find this user" });
   }
 };
 
-exports.add_friend = async ({ req, res }) => {
+exports.add_friend = async (req, res) => {
   try {
     let user = await User.findById(req.params.userId);
     user.friends.unshift(req.params.friendId);
     user.save();
-    return res.status(200).json({ user: user_thoughts_friends });
+    return res.status(200).json({ user: user });
   } catch (err) {
+    console.log(err);
     return res
       .status(404)
       .json({ err_user_not_found: "We couldn't find this user" });
   }
 };
 
-exports.remove_friend = async ({ req, res }) => {
+exports.remove_friend = async (req, res) => {
   try {
     let user = await User.findById(req.params.userId);
-    user.friends.filter((i) => i.toString() !== req.params.friendId);
+    user.friends = user.friends.filter(
+      (i) => i.toString() !== req.params.friendId
+    );
     user.save();
-    return res.status(200).json({ user: user_thoughts_friends });
+    return res.status(200).json({ user: user });
   } catch (err) {
     return res
       .status(404)

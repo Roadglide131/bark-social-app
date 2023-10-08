@@ -94,9 +94,9 @@ exports.add_reaction = async (req, res) => {
     const { reactionBody, username } = req.body;
     let thought = await Thought.findById(req.params.thoughtId);
     if (
+      isEmpty(reactionBody) ||
       reactionBody.length > 280 ||
-      reactionBody.length === 0 ||
-      username.length === 0
+      isEmpty(username)
     ) {
       return res
         .status(400)
@@ -107,8 +107,7 @@ exports.add_reaction = async (req, res) => {
       username,
     });
     await reaction.save();
-
-    thought.reactions.unshift(reaction.reactionId);
+    thought.reactions.unshift(reaction._id);
     await thought.save();
     return res.status(200).json({ thought });
   } catch (err) {
@@ -118,9 +117,11 @@ exports.add_reaction = async (req, res) => {
 exports.remove_reaction = async (req, res) => {
   try {
     let thought = await Thought.findById(req.params.thoughtId);
-    thought.reactions.filter((i) => i.toString() !== req.params.reactionId);
+    thought.reactions = thought.reactions.filter((i) => {
+      return i.toString() != req.params.reactionId;
+    });
     await thought.save();
-    return res.status(200).json({ thought });
+    return res.status(200).json(thought);
   } catch (err) {
     return res.status(404).json({ err_reaction: "Thought doesn't exist" });
   }
