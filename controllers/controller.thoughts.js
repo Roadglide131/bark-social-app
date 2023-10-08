@@ -1,6 +1,7 @@
 const Thought = require("../models/Thought");
 const isEmpty = require("is-empty");
 const User = require("../models/User");
+const Reaction = require("../models/Reaction");
 exports.create_thought = async (req, res) => {
   try {
     const { user, thoughtText } = req.body;
@@ -86,5 +87,41 @@ exports.update_thought = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(400).json({ err_happened: "Error happened" });
+  }
+};
+exports.add_reaction = async (req, res) => {
+  try {
+    const { reactionBody, username } = req.body;
+    let thought = await Thought.findById(req.params.thoughtId);
+    if (
+      reactionBody.length > 280 ||
+      reactionBody.length === 0 ||
+      username.length === 0
+    ) {
+      return res
+        .status(400)
+        .json("Both reaction text and username are required");
+    }
+    let reaction = new Reaction({
+      reactionBody,
+      username,
+    });
+    await reaction.save();
+
+    thought.reactions.unshift(reaction.reactionId);
+    await thought.save();
+    return res.status(200).json({ thought });
+  } catch (err) {
+    return res.status(404).json({ err_reaction: "Thought doesn't exist" });
+  }
+};
+exports.remove_reaction = async (req, res) => {
+  try {
+    let thought = await Thought.findById(req.params.thoughtId);
+    thought.reactions.filter((i) => i.toString() !== req.params.reactionId);
+    await thought.save();
+    return res.status(200).json({ thought });
+  } catch (err) {
+    return res.status(404).json({ err_reaction: "Thought doesn't exist" });
   }
 };
